@@ -1,0 +1,27 @@
+CACHE MANIFEST
+#2017-12-27 v.0.1.13
+# fix calander input problem
+# after dot presentation:
+# 1 is presented to 1, not 100
+# 12 is presented to 12, not 120
+#2017-12-19 v.0.1.12
+# fix kook calculation of ching ming
+# rewind size in mobile setting
+#2017-08-15 v.0.1.10
+# fix yin dun(陰遁) problem
+#2017-08-11 v.0.1.9
+# fix yin dun(陰遁) problem
+#2017-05-02 v.0.1.8
+# add query string function for external linkin
+#2017-02-10 v.0.1.7
+# fix ios/safari dom.querySelectorAll().forEach problem
+#2017-01-17 v.0.1.6
+# remove dqm.zip and bind the download to github master
+index.html
+dqm.css
+pure-min.0.6.0.css
+js/bazi.js
+js/jiqi.js
+js/lunar.js
+js/qimen_min.js
+js/string.js

@@ -1,0 +1,54 @@
+<script src="js2/jiqi.js"></script>
+<script src="js/qimen_min.js"></script>
+
+
+<script>
+    window.onload = function() {
+
+        // 輸入：年、月、日、時、分（秒、毫秒用 0）
+        const 年 = 2025;
+        const 月 = 6;
+        const 日 = 6;      // 必填，不能省略
+        const 時 = 21;
+        const 分 = 3;
+        const 秒 = 0;
+        const 毫秒 = 0;
+
+        // Step 1：公曆 → 節氣 + 八字
+        const jiqi = QIMEN_STAR.jiqi.GetJiqiInfo(年, 月, 日, 時, 分, 秒, 毫秒);
+
+        // Step 2：算元、遁、局
+        const qimenInfo = QIMEN_STAR.calc_kok(jiqi);
+        // qimenInfo.jiqi  → 節氣名（如 "芒種"）
+        // qimenInfo.yuen  → 元（上/中/下）
+        // qimenInfo.dun   → 0=陰遁, 1=陽遁
+        // qimenInfo.kook  → 局數 1~9
+
+        // Step 3：用「時柱」排盤（八字第 7~8 字，即時干支）
+        const 時干支 = jiqi.bazi.substr(6, 2);   // 例如 "庚申"
+        const pan = QIMEN_STAR.qimenCalc(qimenInfo.dun, qimenInfo.kook, 時干支);
+
+        const lines = [];
+        lines.push(qimenInfo.toString());
+        lines.push('值符:'+pan.info.符);
+        lines.push('值使:'+pan.info.使);
+
+        // 讀結果
+        console.log(qimenInfo.toString());           // 芒種下元,陽遁九局
+        console.log('值符:', pan.info.符);
+        console.log('值使:', pan.info.使);
+
+        // 九宮 1~9（5 為中宮）
+        for (let g = 1; g <= 9; g++) {
+        if (g === 5) continue;
+        console.log(
+            `宮${g}: 神${pan.神[g]} 門${pan.門[g]} 星${pan.星[g]} 天${pan.天[g]} 地${pan.地[g]}`
+        );
+        lines.push(`宮${g}: 神${pan.神[g]} 門${pan.門[g]} 星${pan.星[g]} 天${pan.天[g]} 地${pan.地[g]}`);
+        }
+
+        document.getElementById('result').innerHTML = lines.join('<br>');
+}
+</script>
+
+<div id="result"></div>

@@ -1,0 +1,977 @@
+<html lang='zh-tw' mainfest="dqm.manifest">
+<head>
+<title>Great Qi Men Dun Jia -- Tai Yi Qi Men Liu Ren Charting Program</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="pure-min.0.6.0.css" >
+<link rel="stylesheet" type="text/css" href="dqm.css" >
+
+<script>
+// AppCache API is removed in modern browsers; guard to avoid runtime errors.
+if (window.applicationCache) {
+	function updateSite() {
+		if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+			window.applicationCache.swapCache();
+		}
+	}
+	window.applicationCache.addEventListener('updateready', updateSite, false);
+}
+</script>
+<!-- include require script lib -->
+<script src="js2/string.js"></script>
+<script src="js2/jiqi.js"></script>
+<script src="js/bazi.js"></script>
+<script src="js/lunar.js"></script>
+<script src="js/qimen_min.js"></script>
+<script language="JavaScript" src="js/read_palace.js"></script>
+</head>
+<body>
+	<div id="menu">
+		<div style="margin: 6px 0; font-weight: 600;">起始時間</div>
+		<div class="pure-g" >
+            <div class="pure-u-1-8" ><input type="number" name="txtYear" style='border:1' placeholder='yyyy' class='pure-u-1'/></div>
+            <div class="pure-u-1-8" >
+              <select name="cboMonth" class="pure-input-1">
+              <script>
+                for(var i = 1; i < 13; i++)
+                  document.write('<option value="{0}">{0}月</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboDay">
+              <script>
+                for(var i = 1; i < 32; i++)
+                  document.write('<option value="{0}">{0}日</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboHour">
+              <script>
+                for(var i = 0; i < 24; i++)
+                  document.write('<option value="{0}">{0}時</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboMinute">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}分</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboSecond">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}秒</option>'.format(i));
+              </script>
+              </select>
+            </div>
+			<div class="pure-u-1-8" ><input type="number" name="txtMSec" style='border:1' placeholder='yyyy' class='pure-input-1'/></div>
+            <div class="pure-u-1-8" ><input class="pure-button pure-input-1" type="button" value="計算" onclick="calc()" /></div>
+          </div>
+
+		<div style="margin: 10px 0 6px; font-weight: 600;">結束時間</div>
+		<div class="pure-g" >
+            <div class="pure-u-1-8" ><input type="number" name="txtYearEnd" style='border:1' placeholder='yyyy' class='pure-u-1'/></div>
+            <div class="pure-u-1-8" >
+              <select name="cboMonthEnd" class="pure-input-1">
+              <script>
+                for(var i = 1; i < 13; i++)
+                  document.write('<option value="{0}">{0}月</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboDayEnd">
+              <script>
+                for(var i = 1; i < 32; i++)
+                  document.write('<option value="{0}">{0}日</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboHourEnd">
+              <script>
+                for(var i = 0; i < 24; i++)
+                  document.write('<option value="{0}">{0}時</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboMinuteEnd">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}分</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboSecondEnd">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}秒</option>'.format(i));
+              </script>
+              </select>
+            </div>
+			<div class="pure-u-1-8" ><input type="number" name="txtMSecEnd" style='border:1' placeholder='yyyy' class='pure-input-1'/></div>
+            <div class="pure-u-1-8" >
+				<input id="btnBuildRange" class="pure-button pure-input-1" type="button" value="產生列表" />
+			</div>
+          </div>
+	</div>
+	<div class="hr"></div>
+
+	<div id="rangeArea" style="margin: 10px 0;">
+		<div style="margin: 6px 0;">
+			<input id="btnCopyRangeTable" class="pure-button" type="button" value="copy table results" />
+		</div>
+		<table id="tblRangeResults" class="pure-table pure-table-striped" style="width: 100%;">
+			<thead>
+				<tr>
+					<th>Day-Month-Year</th>
+					<th>八字</th>
+					<th>奇門</th>
+					<th>以人代宮</th>
+				</tr>
+			</thead>
+			<tbody id="tblRangeResultsBody"></tbody>
+		</table>
+		<div id="rangeHint" style="margin-top: 6px; color: #666; font-size: 12px;"></div>
+	</div>
+
+	<div id="info">
+		<div><span id="lblDate"></span></div>
+		<div><span id="lblDateLunar"></span></div>
+		<div><span id="lblBazi"></span></div>
+		<div><span id="lblJiqi"></span><span id="lblYuen"></span>元<span style="visibility:hidden">，</span><span id="lblDun"></span>遁<span id="lblKok"></span>局</div>
+		<div>值符天<span id="lblFu"></span><span style="visibility:hidden">，</span>值使<span id="lblShi"></span>門</div>
+	</div>
+	<div id="mainTable" class="table">
+		<div class="tr">
+			<div class="td" id="p4"></div>
+			<div class="td" id="p9"></div>
+			<div class="td" id="p2"></div>
+		</div>
+		<div class="tr">
+			<div class="td" id="p3"></div>
+			<div class="td" id="p5"></div>
+			<div class="td" id="p7"></div>
+		</div>
+		<div class="tr">
+			<div class="td" id="p8"></div>
+			<div class="td" id="p1"></div>
+			<div class="td" id="p6"></div>
+		</div>
+	</div>
+	<div id="tplTable" class="table" style="display:none">
+		<div class="tr">
+			<div class="td" id="i4">4</div>
+			<div class="td" id="i9">9</div>
+			<div class="td" id="i2">2</div>
+		</div>
+		<div class="tr">
+			<div class="td" id="i3">3</div>
+			<div class="td" id="i5">5</div>
+			<div class="td" id="i7">7</div>
+		</div>
+		<div class="tr">
+			<div class="td" id="i8">8</div>
+			<div class="td" id="i1">1</div>
+			<div class="td" id="i6">6</div>
+		</div>
+	</div>
+	<div class="hr"></div>
+	<div>
+		<select id="drpSelectPalaceGroup">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option selected=selected value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+		</select>
+		<textarea id="exportReportArea" style="width:1000px;height: 300px;"></textarea>
+		<input id="btnCopyReport" type="button" value="Copy report">
+		<input id="btnExportReport" type="button" value="Export report">
+	</div>
+	<!-- credits -->
+	<div id="credits">
+		<p><a target="_blank" href="https://www.facebook.com/groups/681148321946000/">大奇門遁甲青龍大殿</a></p>
+		<p><a href="https://github.com/nozomi199/nozomi199.github.io/archive/master.zip">Download here</a>, <a target="_blank" href="http://github.com/nozomi199">Github Source</a></p>
+		<p>It is used for demostrate the QIMEN STAR chinese astrology calculation library.</p>
+	</div>
+</body>
+<script>
+"use strict";
+var gblDate = new Date();
+var qs = window.location.href;
+if(qs.indexOf('?')) {
+	var id = qs.substr(qs.indexOf('?')+1);
+	var patt1=/^[0-9]{4}[0-9]{2}[0-9]{2}-[0-9]{2}[0-9]{2}[0-9]{2}$/i;
+	var patt2=/^[0-9]{4}[0-9]{2}[0-9]{2}-[0-9]{2}[0-9]{2}[0-9]{2}.[0-9]{1,3}$/i;
+	var daysInMonth = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+	if(id.match(patt1)) {
+		// If evenly divisible by 4 and not evenly divisible by 100,
+		// or is evenly divisible by 400, then a leap year
+		var y = (id.substr(0,4))*1;
+		var m = (id.substr(4,2))*1 - 1;
+		var d = (id.substr(6,2))*1;
+		var h = (id.substr(9,2))*1;
+		var i = (id.substr(11,2))*1;
+		var s = (id.substr(13,2))*1;
+		var ms = 0;
+		gblDate = new Date(y,m,d,h,i,s,ms);
+	} else if(id.match(patt2)) {
+		// If evenly divisible by 4 and not evenly divisible by 100,
+		// or is evenly divisible by 400, then a leap year
+		var y = (id.substr(0,4))*1;
+		var m = (id.substr(4,2))*1 - 1;
+		var d = (id.substr(6,2))*1;
+		var h = (id.substr(9,2))*1;
+		var i = (id.substr(11,2))*1;
+		var s = (id.substr(13,2))*1;
+		var ms = (id.substr(16,3))*1;
+		gblDate = new Date(y,m,d,h,i,s,ms);
+	}
+}
+// Compute all Qimen data via the MVVM model (no legacy globals).
+
+// =========================
+// MVVM + OOP (ES6 classes)
+// =========================
+class QiMenModel {
+	constructor(date) {
+		this.date = date;
+		this.jiqi = null;
+		this.qimenInfo = null;
+		this.qimenPan = null;
+		this.gzid = null;
+		this.compute();
+	}
+
+	setDate(date) {
+		this.date = date;
+		this.compute();
+	}
+
+	compute() {
+		const d = this.date;
+		this.jiqi = QIMEN_STAR.jiqi.GetJiqiInfo(
+			d.getFullYear(),
+			d.getMonth()+1,
+			d.getDate(),
+			d.getHours(),
+			d.getMinutes(),
+			d.getSeconds(),
+			d.getMilliseconds()
+		);
+		this.qimenInfo = QIMEN_STAR.calc_kok(this.jiqi);
+		this.qimenPan  = QIMEN_STAR.qimenCalc(
+			this.qimenInfo.dun,
+			this.qimenInfo.kook,
+			this.jiqi.bazi.substr(6,2)
+		);
+		this.gzid = QIMEN_STAR.bazi.gz2idx(this.jiqi.bazi.substr(6,2));
+	}
+}
+
+class QiMenView {
+	render(model) {
+		this.renderBackground(model);
+		this.renderMainTable(model);
+	}
+
+	renderBackground(model) {
+		const d = model.date;
+
+		document.querySelector("#lblDateLunar").innerText =
+			QIMEN_STAR.Solar2Lunar(d.getFullYear(),d.getMonth()+1,d.getDate());
+
+		document.querySelector("#lblDate").innerText =
+			QIMEN_STAR.jiqi.JTime(model.jiqi.julian)+"."+d.getMilliseconds();
+
+		// 八字
+		(function(){
+			var d2 = ['年','月','日','時','分','秒','毫秒','無極','混元','究境'];
+			var bz = model.jiqi.bazi;
+			d2.forEach(function(v,k) {
+				d2[k] = bz.substr(k*2,2)+d2[k];
+			});
+			document.querySelector('#lblBazi').innerHTML =
+				d2.join('<span style="visibility:hidden">，</span>');
+		})();
+
+		// 奇門背景
+		(function() {
+			var q = model.qimenInfo;
+			document.querySelector('#lblJiqi').innerText = q.jiqi;
+			document.querySelector('#lblYuen').innerText = q.yuen;
+			document.querySelector('#lblDun').innerText = "陰陽"[q.dun];
+			document.querySelector('#lblKok').innerText = "零一二三四五六七八九"[q.kook];
+			document.querySelector('#lblFu').innerText = model.qimenPan.info.符;
+			document.querySelector('#lblShi').innerText = model.qimenPan.info.使;
+		})();
+	}
+
+	renderMainTable(model) {
+		var qimenInfo = model.qimenInfo;
+		var jiqi = model.jiqi;
+		var gzid = model.gzid;
+
+		var idx = "0123456789123456789123456789123456789".substr(qimenInfo.kook+4,11);
+		if(qimenInfo.dun == 0) idx = idx.split("").reverse().join("");
+
+		var gz  = jiqi.bazi.substr(6,2);
+		var hmon = "662792448318".substr(parseInt(gzid/10)*2,2);
+		var god = {'符':'值符',
+		'蛇':'螣蛇',
+		'陰':'太陰',
+		'合':'六合',
+		'白':'白虎',
+		'玄':'玄武',
+		'地':'九地',
+		'天':'九天'};
+
+		for(let i = 1; i < 10; i++) {
+			var kok  = idx[i];
+			var qpan = QIMEN_STAR.qimenCalc(qimenInfo.dun,kok,gz);
+			var pan  = document.querySelector("#p"+i);
+			if(!pan) continue;
+
+			for(let j = 1; j < 10; j++) {
+				var dei  = '，';
+				var hung  = '，';
+				var godd  = "，，，，\n";
+				var door  = "，，，，\n";
+				var star  = "，，，{0}".format(qpan['地'][j]);
+
+				if(hmon[0] == j || hmon[1] == j) hung = 'Ｏ';
+				if(qpan['星'][j] == '苪') dei = qpan['地'][5];
+
+				if(j != 5) {
+					godd = "{1}{0}，\n".format(god[qpan['神'][j]], hung);
+					door = "{2}{0}門{1}\n".format(qpan['門'][j],qpan['天'][j],dei);
+					star = "，天{0}{1}".format(qpan['星'][j],qpan['地'][j]);
+				}
+
+				var cell = pan.querySelector("#i"+j);
+				if(!cell) continue;
+				cell.innerHTML =
+					(godd+door+star)
+						.replaceAll("\n","<br />")
+						.replaceAll("，",'<span style="visibility:hidden">，</span>');
+			}
+		}
+	}
+}
+
+class QiMenViewModel {
+	constructor(model, view) {
+		this.model = model;
+		this.view = view;
+	}
+
+	render() {
+		this.view.render(this.model);
+	}
+
+	calcFromInputs() {
+		var year = parseInt(document.querySelector("input[name=txtYear]").value, 10);
+		var ms = parseInt(document.querySelector("input[name=txtMSec]").value, 10);
+
+		if (!Number.isFinite(year) || year < 1) {
+			alert("請輸入正確年份(大於0)");
+			return;
+		}
+		if (!Number.isFinite(ms) || ms < 0 || ms > 999) {
+			alert("請輸入正確毫秒(大於-1小於1000)");
+			return;
+		}
+
+		var nextDate = new Date(
+			year,
+			parseInt(document.querySelector("select[name=cboMonth]").value, 10) - 1,
+			parseInt(document.querySelector("select[name=cboDay]").value, 10),
+			parseInt(document.querySelector("select[name=cboHour]").value, 10),
+			parseInt(document.querySelector("select[name=cboMinute]").value, 10),
+			parseInt(document.querySelector("select[name=cboSecond]").value, 10),
+			ms
+		);
+
+		this.model.setDate(nextDate);
+		this.render();
+	}
+
+	exportReport() {
+		const backgroundData=parseQiMenBackgroundToJson();
+		const data = parseQiMenTableToJson(); // requirement
+
+		let backgroundReport = '';
+	backgroundReport += `在奇門遁甲的最高技法中,你要用到符使三才定位法(只用時辰日干  = 看「當下時運」，適合短期預測,只用八字日干 = 看「本命定位」，適合長期命格分析,兩者結合 + 值使門定位(行動主體) = 最高技法，可同時看出「天命、時運、行動」三者的互動關係,可以交叉驗證)。在奇門遁甲「以人代宮」的最高技法中，必須以盤中實際天干位置為準，而非固定宮位,而每個宮位的天干地支組合也重要。「以人代宮」如沒有上司八字要找出上司,要用宮位之間的「克」與「連」 /「同類疊壓＋門剋」。「以人代宮」的雙層結構：行為位置（天干）vs 角色位置（地支）,奇門「以人代宮」行為位置以及角色位置為位置,奇門「以人代宮」的最高難度：人，同時可以存在於兩個宮位。不是矛盾，是層次,各人「行為位置」（八字日柱天干 → 盤中天干）,各人「角色位置」（八字日柱天干 → 盤中天干的地支,各人行為位置是各人八字日柱天干對應的宮位天干,各人角色位置為位置是各人八字日柱天干對應的宮位天干中的地干,那個地支對應到另一個宮位。八字日柱天干如不能找到宮位地支,可以是對應【五宮/中宮】神煞。在奇門遁甲最高技法中，「值符」代表最高權力、決策者、最終的「發令者」。你要要用奇門知識以及奇門遁甲三奇六儀格局以及六甲遁於六儀以及值使龍氣分析以及八字知識以及《煙波釣叟賦》知識以及《遁甲演義》知識以及《黃帝陰符經》知識以及《五行大義》（隋·蕭吉）和《滴天髓》的「合局優先」知識並特別納入空亡位的吉兇影響的知識去綜合分析。\n`;
+
+		backgroundReport += `【奇門背景資訊】\n`;
+		backgroundReport += `公曆：${backgroundData.公曆日期時間}\n`;
+		backgroundReport += `陰曆：${backgroundData.陰曆日期}\n`;
+		backgroundReport += `節氣：${backgroundData.節氣}\n`;
+		backgroundReport += `元遁局：${backgroundData.元}元 ${backgroundData.遁}遁 ${backgroundData.局}局\n`;
+		backgroundReport += `值符：天${backgroundData.值符天干}　值使：${backgroundData.值使門}門\n`;
+		if (backgroundData.八字.length > 0) {
+			var humanCharacter=[];
+			for(var i=0;i<4;i++){
+				humanCharacter[i]=backgroundData.八字[i];
+			}
+			backgroundReport += `八字：${humanCharacter.join('，')}\n`;
+			backgroundReport += `精準八字：${backgroundData.八字.join('，')}\n`;
+		}
+		backgroundReport += `======================\n`;
+
+		let palaceReport = '';
+		let palacesEnergies = ['坎一宮','坤二宮','震三宮','𢁉四宮','五宮/中宮','乾六宮','兌七宮','艮八宮','離九宮'];
+		for (let i = 1; i <= 9; i++) {
+			const palacesEnergy=palacesEnergies[i-1];
+			const palace = `宮${i}`;
+			const info = data[palace];
+			if (!info) continue;
+			let GodsAndDemons = info.神煞.includes("Ｏ") ? info.神煞.replace(/Ｏ/g, "") : info.神煞;
+
+			palaceReport += `【${palacesEnergy}】\n`;
+			palaceReport += `天干：${info.地盤天干 || '無標示'}\n`;
+			palaceReport += `地支：${info.地盤 || '無標示'}\n`;
+			palaceReport += `天星：${info.天星 || '無標示'}\n`;
+			palaceReport += `神煞：${GodsAndDemons || '無標示'}\n`;
+			if(info.神煞.includes("Ｏ")){
+				palaceReport += `空亡\n`;
+			}
+			palaceReport += `八門：${info.八門 || '無標示'}\n`;
+			palaceReport += `----------------------\n`;
+		}
+
+		const fullReport = `${backgroundReport}${palaceReport}`.trim();
+		document.getElementById('exportReportArea').value = fullReport.trim();
+	}
+}
+
+// Global instance (so legacy inline handlers can delegate safely)
+var qimenViewModel = new QiMenViewModel(new QiMenModel(gblDate), new QiMenView());
+function calc(){
+	if(qimenViewModel) return qimenViewModel.calcFromInputs();
+}
+document.addEventListener("DOMContentLoaded",function() {
+	(function() {
+		document.querySelector("input[name=txtYear]").value = gblDate.getFullYear();
+		document.querySelector("select[name=cboMonth]").value = gblDate.getMonth()+1;
+		document.querySelector("select[name=cboDay]").value = gblDate.getDate();
+		document.querySelector("select[name=cboHour]").value = gblDate.getHours();
+		document.querySelector("select[name=cboMinute]").value = gblDate.getMinutes();
+		document.querySelector("select[name=cboSecond]").value = gblDate.getSeconds();
+		document.querySelector("input[name=txtMSec]").value = gblDate.getMilliseconds();
+
+		// default end time = start time
+		document.querySelector("input[name=txtYearEnd]").value = gblDate.getFullYear();
+		document.querySelector("select[name=cboMonthEnd]").value = gblDate.getMonth()+1;
+		document.querySelector("select[name=cboDayEnd]").value = gblDate.getDate();
+		document.querySelector("select[name=cboHourEnd]").value = gblDate.getHours();
+		document.querySelector("select[name=cboMinuteEnd]").value = gblDate.getMinutes();
+		document.querySelector("select[name=cboSecondEnd]").value = gblDate.getSeconds();
+		document.querySelector("input[name=txtMSecEnd]").value = gblDate.getMilliseconds();
+
+		// End time (H/M/S/MS) must always equal start time.
+		const endHour = document.querySelector("select[name=cboHourEnd]");
+		const endMinute = document.querySelector("select[name=cboMinuteEnd]");
+		const endSecond = document.querySelector("select[name=cboSecondEnd]");
+		const endMS = document.querySelector("input[name=txtMSecEnd]");
+		if (endHour) endHour.disabled = true;
+		if (endMinute) endMinute.disabled = true;
+		if (endSecond) endSecond.disabled = true;
+		if (endMS) endMS.readOnly = true;
+	})();
+	
+	(function() {
+		var tpl = document.querySelector("#tplTable").cloneNode(true);
+		tpl.style.display = "";
+		var tmp = tpl.querySelectorAll(".td");
+		[].forEach.call(tmp,function(v,k) {
+			v.style.textAlign = "center";
+			v.style.border = "1px dotted #999"
+			v.style.overflow = "hidden";
+		});
+		var tmp = document.querySelectorAll("#mainTable .td");
+		[].forEach.call(tmp,function(v,k){
+			v.appendChild(tpl.cloneNode(true));
+			v.style.border = "1px solid #999";
+		});
+	})();
+	qimenViewModel.render();
+
+	(function bindRangeUI(){
+		const btn = document.getElementById("btnBuildRange");
+		if (!btn) return;
+
+		const getNumber = (sel) => {
+			const el = document.querySelector(sel);
+			if (!el) return NaN;
+			return parseInt(el.value, 10);
+		};
+
+		const syncEndTimeFromStart = () => {
+			const h = getNumber("select[name=cboHour]");
+			const m = getNumber("select[name=cboMinute]");
+			const s = getNumber("select[name=cboSecond]");
+			const ms = getNumber("input[name=txtMSec]");
+
+			const endHour = document.querySelector("select[name=cboHourEnd]");
+			const endMinute = document.querySelector("select[name=cboMinuteEnd]");
+			const endSecond = document.querySelector("select[name=cboSecondEnd]");
+			const endMS = document.querySelector("input[name=txtMSecEnd]");
+
+			if (endHour && Number.isFinite(h)) endHour.value = String(h);
+			if (endMinute && Number.isFinite(m)) endMinute.value = String(m);
+			if (endSecond && Number.isFinite(s)) endSecond.value = String(s);
+			if (endMS && Number.isFinite(ms)) endMS.value = String(ms);
+		};
+
+		[
+			"input[name=txtYear]",
+			"select[name=cboMonth]",
+			"select[name=cboDay]",
+			"select[name=cboHour]",
+			"select[name=cboMinute]",
+			"select[name=cboSecond]",
+			"input[name=txtMSec]"
+		]
+			.forEach((sel) => {
+				const el = document.querySelector(sel);
+				if (!el) return;
+				el.addEventListener("change", syncEndTimeFromStart);
+				el.addEventListener("input", syncEndTimeFromStart);
+			});
+		syncEndTimeFromStart();
+
+		const getStartDate = () => {
+			const year = getNumber("input[name=txtYear]");
+			const ms = getNumber("input[name=txtMSec]");
+			if (!Number.isFinite(year) || year < 1) return null;
+			if (!Number.isFinite(ms) || ms < 0 || ms > 999) return null;
+			return new Date(
+				year,
+				getNumber("select[name=cboMonth]") - 1,
+				getNumber("select[name=cboDay]"),
+				getNumber("select[name=cboHour]"),
+				getNumber("select[name=cboMinute]"),
+				getNumber("select[name=cboSecond]"),
+				ms
+			);
+		};
+
+		const getEndDate = () => {
+			const year = getNumber("input[name=txtYearEnd]");
+			if (!Number.isFinite(year) || year < 1) return null;
+
+			// Force end time (H/M/S/MS) to match start time.
+			const h = getNumber("select[name=cboHour]");
+			const m = getNumber("select[name=cboMinute]");
+			const s = getNumber("select[name=cboSecond]");
+			const ms = getNumber("input[name=txtMSec]");
+			if (!Number.isFinite(ms) || ms < 0 || ms > 999) return null;
+
+			return new Date(
+				year,
+				getNumber("select[name=cboMonthEnd]") - 1,
+				getNumber("select[name=cboDayEnd]"),
+				h,
+				m,
+				s,
+				ms
+			);
+		};
+
+		const pad2 = (n) => String(n).padStart(2, "0");
+		const formatDMY = (d) => `${pad2(d.getDate())}-${pad2(d.getMonth()+1)}-${d.getFullYear()}`;
+		const formatISO = (d) =>
+			`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+
+		const formatBazi4 = (bz) => {
+			if (!bz || bz.length < 8) return "";
+			return [
+				`${bz.substr(0,2)}年`,
+				`${bz.substr(2,2)}月`,
+				`${bz.substr(4,2)}日`,
+				`${bz.substr(6,2)}時`
+			].join(" ");
+		};
+
+		const formatQimen = (jiqi, qimenInfo) => {
+			if (!jiqi?.bazi || !qimenInfo) return "";
+
+			const palacesEnergies = ['坎一宮','坤二宮','震三宮','𢁉四宮','五宮/中宮','乾六宮','兌七宮','艮八宮','離九宮'];
+			const godMap = {
+				'符': '值符', '蛇': '螣蛇', '陰': '太陰', '合': '六合',
+				'白': '白虎', '玄': '玄武', '地': '九地', '天': '九天'
+			};
+			const bz = jiqi?.bazi || "";
+			const bz_arr= bz.split(" ");
+			const none = '無標示';
+			const hourGZ = jiqi.bazi.substr(6, 2);
+			const gzid = QIMEN_STAR.bazi.gz2idx(hourGZ);
+			const hmon = "662792448318".substr(parseInt(gzid / 10, 10) * 2, 2);
+			const pan = QIMEN_STAR.qimenCalc(qimenInfo.dun, qimenInfo.kook, hourGZ);
+			const lines = [];
+
+			for (let j = 1; j <= 9; j++) {
+				const palace = palacesEnergies[j - 1];
+
+				if (j === 5) {
+					lines.push(
+						`【${palace}】 天干：${none} | 地支：${none} | 天星：${none} | 神煞：${pan['地'][5] || none} | 八門：${none}`
+					);
+					continue;
+				}
+
+				let dei = '，';
+				let hung = '，';
+				if (hmon[0] == j || hmon[1] == j) hung = 'Ｏ';
+				if (pan['星'][j] === '苪') dei = pan['地'][5];
+
+				const doorRaw = (dei + pan['門'][j] + '門' + pan['天'][j]).replace(/，/g, '');
+				let tiangan = none;
+				let bamen = none;
+				if (doorRaw.length === 4) {
+					tiangan = doorRaw[3];
+					bamen = doorRaw.slice(1, 3);
+				} else if (doorRaw.length === 3) {
+					tiangan = doorRaw[2];
+					bamen = doorRaw.slice(0, 2);
+				}
+
+				const dizhi = pan['地'][j] || none;
+				const tianxing = pan['星'][j] ? '天' + pan['星'][j] : none;
+				const shensha = godMap[pan['神'][j]] || none;
+				const isEmpty = hung === 'Ｏ';
+				const shenPart = isEmpty ? `${shensha} 空亡` : shensha;
+
+				lines.push(
+					`【${palace}】{ 天干：${tiangan} | 地支：${dizhi} | 天星：${tianxing} | 神煞：${shenPart} | 八門：${bamen}  }`
+				);
+			}
+
+			return "奇門："+lines;
+		};
+		const sixJia= (dayStemBranch)=>{
+			/**
+			 * 六甲
+			 * "甲子": = "戊"; "甲戌": = "己"; "甲申": "庚"; "甲午": "辛"; "甲辰": "壬"; "甲寅": "癸";
+			 * */
+			if(dayStemBranch=='甲子'){
+				return '戊';
+			}else if(dayStemBranch=='甲戌'){
+				return '己';
+			}else if(dayStemBranch=='甲申'){
+				return '庚';
+			}else if(dayStemBranch=='甲午'){
+				return '辛';
+			}else if(dayStemBranch=='甲辰'){
+				return '壬';
+			}else if(dayStemBranch=='甲寅'){
+				return '癸';
+			}
+			return '';	
+		}
+
+
+		const personAsThePalace= (jiqi, qimenInfo ) => {
+			if (!jiqi?.bazi || !qimenInfo) return "";
+
+			const palacesEnergies = ['坎一宮','坤二宮','震三宮','𢁉四宮','五宮/中宮','乾六宮','兌七宮','艮八宮','離九宮'];
+			const godMap = {
+				'符': '值符', '蛇': '螣蛇', '陰': '太陰', '合': '六合',
+				'白': '白虎', '玄': '玄武', '地': '九地', '天': '九天'
+			};
+			const bz = jiqi?.bazi || "";
+			var dayStem = bz.substr(4, 1);   // 日柱天干，例如 "丙"
+			
+			const dayBranch = bz.substr(5, 1); // 日柱地支，例如 "午"
+			dayStem = (dayStem=="甲") ? sixJia(dayStem+dayBranch):dayStem;
+			const none = '無標示';
+			const hourGZ = jiqi.bazi.substr(6, 2);
+			const gzid = QIMEN_STAR.bazi.gz2idx(hourGZ);
+			const hmon = "662792448318".substr(parseInt(gzid / 10, 10) * 2, 2);
+			const pan = QIMEN_STAR.qimenCalc(qimenInfo.dun, qimenInfo.kook, hourGZ);
+			const lines = [];
+
+			for (let j = 1; j <= 9; j++) {
+				const palace = palacesEnergies[j - 1];
+
+				if (j === 5) {
+					lines.push(
+						`【${palace}】 天干：${none} | 地支：${none} | 天星：${none} | 神煞：${pan['地'][5] || none} | 八門：${none}`
+					);
+					continue;
+				}
+
+				let dei = '，';
+				let hung = '，';
+				if (hmon[0] == j || hmon[1] == j) hung = 'Ｏ';
+				if (pan['星'][j] === '苪') dei = pan['地'][5];
+
+				const doorRaw = (dei + pan['門'][j] + '門' + pan['天'][j]).replace(/，/g, '');
+				let tiangan = none;
+				let bamen = none;
+				if (doorRaw.length === 4) {
+					tiangan = doorRaw[3];
+					bamen = doorRaw.slice(1, 3);
+				} else if (doorRaw.length === 3) {
+					tiangan = doorRaw[2];
+					bamen = doorRaw.slice(0, 2);
+				}
+
+				const dizhi = pan['地'][j] || none;
+				const tianxing = pan['星'][j] ? '天' + pan['星'][j] : none;
+				const shensha = godMap[pan['神'][j]] || none;
+				const isEmpty = hung === 'Ｏ';
+				const shenPart = isEmpty ? `${shensha} 空亡` : shensha;
+
+				/*
+				tiangan == 日干
+				行為位置：盤中天干 = 八字日柱天干
+				dizhi == 地支
+				角色位置（目前寫法）：盤中地支 = 日柱天干
+				*/
+				if(tiangan==dayStem){
+					lines.push(
+						`問事人:{行為位置【${palace}】{ 天干：${tiangan} | 地支：${dizhi} | 天星：${tianxing} | 神煞：${shenPart} | 八門：${bamen}  }}`
+					);
+				}
+				if(dizhi==dayStem){
+					lines.push(
+						`問事人:{角色位置【${palace}】{ 天干：${tiangan} | 地支：${dizhi} | 天星：${tianxing} | 神煞：${shenPart} | 八門：${bamen}  }}`
+					);
+				}
+			}
+
+			return "以人代宮 問事人:"+lines;
+		}
+
+		const setStartInputsFromDate = (d) => {
+			document.querySelector("input[name=txtYear]").value = d.getFullYear();
+			document.querySelector("select[name=cboMonth]").value = d.getMonth() + 1;
+			document.querySelector("select[name=cboDay]").value = d.getDate();
+			document.querySelector("select[name=cboHour]").value = d.getHours();
+			document.querySelector("select[name=cboMinute]").value = d.getMinutes();
+			document.querySelector("select[name=cboSecond]").value = d.getSeconds();
+			document.querySelector("input[name=txtMSec]").value = d.getMilliseconds();
+			syncEndTimeFromStart();
+		};
+
+		const tbody = document.getElementById("tblRangeResultsBody");
+		const hint = document.getElementById("rangeHint");
+
+		btn.addEventListener("click", function(){
+			// Always force end ms (and H/M/S) to equal start.
+			syncEndTimeFromStart();
+
+			const start = getStartDate();
+			const end = getEndDate();
+			if (!start || !end) {
+				alert("請輸入正確起始/結束日期，且毫秒需為 0-999");
+				return;
+			}
+
+			let s = start;
+			let e = end;
+			if (e.getTime() < s.getTime()) {
+				const tmp = s; s = e; e = tmp;
+			}
+
+			// Total output records based on total days (inclusive).
+			const maxRows = 20000; // safety cap
+			const sYMD = Date.UTC(s.getFullYear(), s.getMonth(), s.getDate());
+			const eYMD = Date.UTC(e.getFullYear(), e.getMonth(), e.getDate());
+			const totalDays = Math.floor((eYMD - sYMD) / 86400000) + 1;
+			if (totalDays > maxRows) {
+				alert(`範圍太大：${totalDays} 筆（每天一筆）。請縮小範圍（上限 ${maxRows} 筆）。`);
+				return;
+			}
+
+			if (tbody) tbody.innerHTML = "";
+			if (hint) hint.innerText = `共 ${totalDays} 筆（每天一筆；點選任一筆會套用到起始時間並計算 + 匯出報告）`;
+
+			for (let day = 0; day < totalDays; day++) {
+				const d = new Date(s.getTime());
+				d.setDate(d.getDate() + day);
+				const t = d.getTime();
+				const jiqi = QIMEN_STAR.jiqi.GetJiqiInfo(
+					d.getFullYear(),
+					d.getMonth()+1,
+					d.getDate(),
+					d.getHours(),
+					d.getMinutes(),
+					d.getSeconds(),
+					d.getMilliseconds()
+				);
+				const bz = jiqi?.bazi || "";
+				const qimenInfo = QIMEN_STAR.calc_kok(jiqi);
+
+				const tr = document.createElement("tr");
+				tr.style.cursor = "pointer";
+				tr.dataset.ts = String(t);
+
+				const td1 = document.createElement("td");
+				td1.innerText = formatDMY(d);
+				td1.title = formatISO(d);
+
+				const td2 = document.createElement("td");
+				td2.innerText = formatBazi4(bz);
+				td2.title = bz;
+
+				const td3 = document.createElement("td");
+				td3.style.whiteSpace = "pre-line";
+				td3.style.fontSize = "11px";
+				td3.innerText = formatQimen(jiqi, qimenInfo);
+				td3.title = qimenInfo.toString();
+
+				const td4 = document.createElement("td");
+				td4.style.whiteSpace = "pre-line";
+				td4.style.fontSize = "11px";
+				td4.innerText = personAsThePalace(jiqi, qimenInfo);
+				td4.title = "以人代宮:行為位置、角色位置";
+
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+				tr.appendChild(td3);
+				tr.appendChild(td4);
+
+				tr.addEventListener("click", function(){
+					const ts = parseInt(tr.dataset.ts, 10);
+					if (!Number.isFinite(ts)) return;
+					const clicked = new Date(ts);
+					setStartInputsFromDate(clicked);
+					calc();
+					if (window.qimenViewModel) window.qimenViewModel.exportReport();
+				});
+
+				if (tbody) tbody.appendChild(tr);
+			}
+		});
+
+		(function bindCopyTableResults(){
+			const btnCopyTable = document.getElementById("btnCopyRangeTable");
+			if (!btnCopyTable) return;
+
+			const copyText = async (text) => {
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					await navigator.clipboard.writeText(text);
+					return true;
+				}
+				// Fallback for older browsers / non-HTTPS contexts.
+				const textarea = document.createElement("textarea");
+				textarea.value = text;
+				textarea.style.position = "fixed";
+				textarea.style.left = "-9999px";
+				textarea.style.top = "0";
+				document.body.appendChild(textarea);
+				textarea.focus();
+				textarea.select();
+				const ok = document.execCommand("copy");
+				document.body.removeChild(textarea);
+				return ok;
+			};
+
+			const tableToTSV = () => {
+				const rows = [];
+				rows.push(["Day-Month-Year", "八字", "奇門"].join("\t"));
+				const trs = document.querySelectorAll("#tblRangeResultsBody tr");
+				[].forEach.call(trs, (tr) => {
+					const tds = tr.querySelectorAll("td");
+					const c1 = (tds[0]?.innerText || "").replace(/\r?\n/g, " ").trim();
+					const c2 = (tds[1]?.innerText || "").replace(/\r?\n/g, " ").trim();
+					const c3 = (tds[2]?.innerText || "").replace(/\r?\n/g, " ").trim();
+					const c4 = (tds[3]?.innerText || "").replace(/\r?\n/g, " ").trim();
+					rows.push([c1, c2, c3, c4].join("\t"));
+				});
+				return rows.join("\n");
+			};
+
+			btnCopyTable.addEventListener("click", async function(){
+				const text = tableToTSV();
+				const trs = document.querySelectorAll("#tblRangeResultsBody tr");
+				if (!trs || trs.length === 0) {
+					alert("目前沒有列表可複製，請先按「產生列表」");
+					return;
+				}
+				try {
+					const ok = await copyText(text);
+					if (ok) alert("表格結果已複製到剪貼簿！");
+					else alert("複製失敗，請手動複製。");
+				} catch (e) {
+					alert("複製失敗，請手動複製。");
+				}
+			});
+		})();
+	})();
+});
+</script>
+<script>
+
+function parseQiMenBackgroundToJson() {
+  const getText = (id) => document.getElementById(id)?.innerText.trim() || '';
+
+  const result = {
+    公曆日期時間: getText('lblDate'),            // 2025年06月06日21時03分47秒.959
+    陰曆日期: getText('lblDateLunar'),           // 陰曆 2025年 5月 11日
+    八字: [],                                     // ['乙巳年','壬午月',...]
+    節氣: getText('lblJiqi'),                     // 芒種
+    元: getText('lblYuen'),                       // 下
+    遁: getText('lblDun'),                        // 陽
+    局: getText('lblKok'),                        // 九
+    值符天干: getText('lblFu'),                   // 沖
+    值使門: getText('lblShi')                     // 傷
+  };
+
+  // 處理八字段落為陣列
+  const baziRaw = document.getElementById('lblBazi')?.innerText || '';
+  if (baziRaw) {
+    result.八字 = baziRaw
+      .replace(/，/g, '')
+      .split(/(?<=..[年月日時分秒毫極元境])/)
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  return result;
+}
+
+
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+	// Delegate to the MVVM implementation.
+	const btnExport = document.getElementById("btnExportReport");
+	if (btnExport) {
+		btnExport.addEventListener("click", function () {
+			if (window.qimenViewModel) window.qimenViewModel.exportReport();
+		});
+	}
+
+	// Bind Copy button.
+	const btnCopy = document.getElementById("btnCopyReport");
+	if (btnCopy) {
+		btnCopy.addEventListener("click", function () {
+			const textarea = document.getElementById("exportReportArea");
+			textarea.select();
+			document.execCommand("copy");
+			alert("報告內容已複製到剪貼簿！");
+		});
+	}
+});
+</script>
+
+</html>

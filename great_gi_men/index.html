@@ -1,0 +1,413 @@
+<html lang='zh-tw' mainfest="dqm.manifest">
+<head>
+<title>大奇門遁甲</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="pure-min.0.6.0.css" >
+<link rel="stylesheet" type="text/css" href="dqm.css" >
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="bookmark" href="/favicon.ico" />
+<script>
+function updateSite(event) {
+	window.applicationCache.swapCache() ;
+}
+window.applicationCache.addEventListener('updateready',updateSite,false);
+</script>
+<!-- include require script lib -->
+<script src="js/string.js"></script>
+<script src="js/jiqi.js"></script>
+<script src="js/bazi.js"></script>
+<script src="js/lunar.js"></script>
+<script src="js/qimen_min.js"></script>
+<script language="JavaScript" src="js/read_palace.js"></script>
+</head>
+<body>
+	<div id="menu">
+		<div class="pure-g" >
+            <div class="pure-u-1-8" ><input type="number" name="txtYear" style='border:1' placeholder='yyyy' class='pure-u-1'/></div>
+            <div class="pure-u-1-8" >
+              <select name="cboMonth" class="pure-input-1">
+              <script>
+                for(var i = 1; i < 13; i++)
+                  document.write('<option value="{0}">{0}月</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboDay">
+              <script>
+                for(var i = 1; i < 32; i++)
+                  document.write('<option value="{0}">{0}日</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboHour">
+              <script>
+                for(var i = 0; i < 24; i++)
+                  document.write('<option value="{0}">{0}時</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboMinute">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}分</option>'.format(i));
+              </script>
+              </select>
+            </div>
+            <div class="pure-u-1-8" >
+              <select name="cboSecond">
+              <script>
+                for(var i = 0; i < 60; i++)
+                  document.write('<option value="{0}">{0}秒</option>'.format(i));
+              </script>
+              </select>
+            </div>
+			<div class="pure-u-1-8" ><input type="number" name="txtMSec" style='border:1' placeholder='yyyy' class='pure-input-1'/></div>
+            <div class="pure-u-1-8" ><input class="pure-button pure-input-1" type="button" value="計算" onclick="calc()" /></div>
+          </div>
+	</div>
+	<div class="hr"></div>
+	<div id="info">
+		<div><span id="lblDate"></span></div>
+		<div><span id="lblDateLunar"></span></div>
+		<div><span id="lblBazi"></span></div>
+		<div><span id="lblJiqi"></span><span id="lblYuen"></span>元<span style="visibility:hidden">，</span><span id="lblDun"></span>遁<span id="lblKok"></span>局</div>
+		<div>值符天<span id="lblFu"></span><span style="visibility:hidden">，</span>值使<span id="lblShi"></span>門</div>
+	</div>
+	<div id="mainTable" class="table">
+		<div class="tr">
+			<div class="td" id="p4"></div>
+			<div class="td" id="p9"></div>
+			<div class="td" id="p2"></div>
+		</div>
+		<div class="tr">
+			<div class="td" id="p3"></div>
+			<div class="td" id="p5"></div>
+			<div class="td" id="p7"></div>
+		</div>
+		<div class="tr">
+			<div class="td" id="p8"></div>
+			<div class="td" id="p1"></div>
+			<div class="td" id="p6"></div>
+		</div>
+	</div>
+	<div id="tplTable" class="table" style="display:none">
+		<div class="tr">
+			<div class="td" id="i4">4</div>
+			<div class="td" id="i9">9</div>
+			<div class="td" id="i2">2</div>
+		</div>
+		<div class="tr">
+			<div class="td" id="i3">3</div>
+			<div class="td" id="i5">5</div>
+			<div class="td" id="i7">7</div>
+		</div>
+		<div class="tr">
+			<div class="td" id="i8">8</div>
+			<div class="td" id="i1">1</div>
+			<div class="td" id="i6">6</div>
+		</div>
+	</div>
+	<div class="hr"></div>
+	<div>
+		<select id="drpSelectPalaceGroup">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option selected=selected value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+		</select>
+		<textarea id="exportReportArea" style="width:1000px;height: 300px;"></textarea>
+		<input id="btnCopyReport" type="button" value="Copy report">
+		<input id="btnExportReport" type="button" value="Export report">
+	</div>
+	<!-- credits -->
+	<div id="credits">
+		<p><a target="_blank" href="https://www.facebook.com/groups/681148321946000/">大奇門遁甲青龍大殿</a></p>
+		<p><a href="https://github.com/nozomi199/nozomi199.github.io/archive/master.zip">Download here</a>, <a target="_blank" href="http://github.com/nozomi199">Github Source</a></p>
+		<p>It is used for demostrate the QIMEN STAR chinese astrology calculation library.</p>
+	</div>
+</body>
+<script>
+"use strict";
+var gblDate = new Date();
+var qs = window.location.href;
+if(qs.indexOf('?')) {
+	var id = qs.substr(qs.indexOf('?')+1);
+	var patt1=/^[0-9]{4}[0-9]{2}[0-9]{2}-[0-9]{2}[0-9]{2}[0-9]{2}$/i;
+	var patt2=/^[0-9]{4}[0-9]{2}[0-9]{2}-[0-9]{2}[0-9]{2}[0-9]{2}.[0-9]{1,3}$/i;
+	var daysInMonth = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+	if(id.match(patt1)) {
+		// If evenly divisible by 4 and not evenly divisible by 100,
+		// or is evenly divisible by 400, then a leap year
+		var y = (id.substr(0,4))*1;
+		var m = (id.substr(4,2))*1 - 1;
+		var d = (id.substr(6,2))*1;
+		var h = (id.substr(9,2))*1;
+		var i = (id.substr(11,2))*1;
+		var s = (id.substr(13,2))*1;
+		var ms = 0;
+		gblDate = new Date(y,m,d,h,i,s,ms);
+	} else if(id.match(patt2)) {
+		// If evenly divisible by 4 and not evenly divisible by 100,
+		// or is evenly divisible by 400, then a leap year
+		var y = (id.substr(0,4))*1;
+		var m = (id.substr(4,2))*1 - 1;
+		var d = (id.substr(6,2))*1;
+		var h = (id.substr(9,2))*1;
+		var i = (id.substr(11,2))*1;
+		var s = (id.substr(13,2))*1;
+		var ms = (id.substr(16,3))*1;
+		gblDate = new Date(y,m,d,h,i,s,ms);
+	}
+}
+var jiqi = QIMEN_STAR.jiqi.GetJiqiInfo(
+	gblDate.getFullYear(),
+	gblDate.getMonth()+1,
+	gblDate.getDate(),
+	gblDate.getHours(),
+	gblDate.getMinutes(),
+	gblDate.getSeconds(),
+	gblDate.getMilliseconds()
+);
+var qimenInfo = QIMEN_STAR.calc_kok(jiqi);
+var qimenPan  = QIMEN_STAR.qimenCalc(qimenInfo.dun,qimenInfo.kook,jiqi.bazi.substr(6,2));
+var gzid = QIMEN_STAR.bazi.gz2idx(jiqi.bazi.substr(6,2));
+function calc(){
+	var a = parseInt(document.querySelector("input[name=txtYear]").value);
+	var b = parseInt(document.querySelector("input[name=txtMSec]").value);
+	if(a < 1) {
+		alert('請輸入正確年份(大於0)');
+		return;
+	}
+	if(b < 0|b>999) {
+		alert('請輸入正確毫秒(大於-1小於1000)');
+		return;
+	} 
+	gblDate = new Date(
+		parseInt(document.querySelector("input[name=txtYear]").value),
+		parseInt(document.querySelector("select[name=cboMonth]").value)-1,
+		parseInt(document.querySelector("select[name=cboDay]").value),
+		parseInt(document.querySelector("select[name=cboHour]").value),
+		parseInt(document.querySelector("select[name=cboMinute]").value),
+		parseInt(document.querySelector("select[name=cboSecond]").value),
+		parseInt(document.querySelector("input[name=txtMSec]").value)
+	);
+	jiqi = QIMEN_STAR.jiqi.GetJiqiInfo(
+		gblDate.getFullYear(),
+		gblDate.getMonth()+1,
+		gblDate.getDate(),
+		gblDate.getHours(),
+		gblDate.getMinutes(),
+		gblDate.getSeconds(),
+		gblDate.getMilliseconds()
+	);
+	qimenInfo = QIMEN_STAR.calc_kok(jiqi);
+	qimenPan  = QIMEN_STAR.qimenCalc(qimenInfo.dun,qimenInfo.kook,jiqi.bazi.substr(6,2));
+	gzid = QIMEN_STAR.bazi.gz2idx(jiqi.bazi.substr(6,2));
+	//
+	calc2();
+}
+function calc2() {
+	document.querySelector("#lblDateLunar").innerText = QIMEN_STAR.Solar2Lunar(gblDate.getFullYear(),gblDate.getMonth()+1,gblDate.getDate());
+	document.querySelector("#lblDate").innerText = QIMEN_STAR.jiqi.JTime(jiqi.julian)+"."+gblDate.getMilliseconds();
+	(function(){
+		var d = ['年','月','日','時','分','秒','毫秒','無極','混元','究境'];
+		var bz = jiqi.bazi;
+		d.forEach(function(v,k) {
+			d[k] = bz.substr(k*2,2)+d[k];
+		});
+		document.querySelector('#lblBazi').innerHTML = d.join('<span style="visibility:hidden">，</span>');
+	})();
+	(function() {
+		var q = qimenInfo;
+		document.querySelector('#lblJiqi').innerText = q.jiqi;
+		document.querySelector('#lblYuen').innerText = q.yuen;
+		document.querySelector('#lblDun').innerText = "陰陽"[q.dun];
+		document.querySelector('#lblKok').innerText = "零一二三四五六七八九"[q.kook];
+		document.querySelector('#lblFu').innerText = qimenPan.info.符;
+		document.querySelector('#lblShi').innerText = qimenPan.info.使;
+	})();
+	(function() {
+		var idx = "0123456789123456789123456789123456789".substr(qimenInfo.kook+4,11);
+		if(qimenInfo.dun == 0) idx = idx.split("").reverse().join("");
+		console.log(idx);
+		//console.log(idx, idx.length)
+		var gz  = jiqi.bazi.substr(6,2);
+		var hmon = "662792448318".substr(parseInt(gzid/10)*2,2);
+		var god = {'符':'值符',
+		'蛇':'螣蛇',
+		'陰':'太陰',
+		'合':'六合',
+		'白':'白虎',
+		'玄':'玄武',
+		'地':'九地',
+		'天':'九天'};
+		for(var i = 1; i < 10; i++) {
+			var kok  = idx[i];
+			var qpan = QIMEN_STAR.qimenCalc(qimenInfo.dun,kok,gz);
+			var pan  = document.querySelector("#p"+i);
+			var dei  = qpan['地'][5];
+			for(var j = 1; j < 10; j++) {
+				var dei  = '，';
+				var hung  = '，';
+				var godd  = "，，，，\n";
+				var door  = "，，，，\n";
+				var star  = "，，，{0}".format(qpan['地'][j]);
+				if(hmon[0] == j || hmon[1] == j) hung = 'Ｏ';
+				if(qpan['星'][j] == '苪') dei = qpan['地'][5];
+				if(j != 5) {
+					godd = "{1}{0}，\n".format(god[qpan['神'][j]], hung);
+					door = "{2}{0}門{1}\n".format(qpan['門'][j],qpan['天'][j],dei);
+					star = "，天{0}{1}".format(qpan['星'][j],qpan['地'][j]);
+				}
+				pan.querySelector("#i"+j).innerHTML = 
+				(godd+
+				door+
+				star).replaceAll("\n","<br />").replaceAll("，",'<span style="visibility:hidden">，</span>');
+			}
+		}
+	})();
+}
+document.addEventListener("DOMContentLoaded",function() {
+	(function() {
+		document.querySelector("input[name=txtYear]").value = gblDate.getFullYear();
+		document.querySelector("select[name=cboMonth]").value = gblDate.getMonth()+1;
+		document.querySelector("select[name=cboDay]").value = gblDate.getDate();
+		document.querySelector("select[name=cboHour]").value = gblDate.getHours();
+		document.querySelector("select[name=cboMinute]").value = gblDate.getMinutes();
+		document.querySelector("select[name=cboSecond]").value = gblDate.getSeconds();
+		document.querySelector("input[name=txtMSec]").value = gblDate.getMilliseconds();
+	})();
+	
+	(function() {
+		var tpl = document.querySelector("#tplTable").cloneNode(true);
+		tpl.style.display = "";
+		var tmp = tpl.querySelectorAll(".td");
+		[].forEach.call(tmp,function(v,k) {
+			v.style.textAlign = "center";
+			v.style.border = "1px dotted #999"
+			v.style.overflow = "hidden";
+		});
+		var tmp = document.querySelectorAll("#mainTable .td");
+		[].forEach.call(tmp,function(v,k){
+			v.appendChild(tpl.cloneNode(true));
+			v.style.border = "1px solid #999";
+		});
+	})();
+	calc2();
+});
+</script>
+<script>
+
+function parseQiMenBackgroundToJson() {
+  const getText = (id) => document.getElementById(id)?.innerText.trim() || '';
+
+  const result = {
+    公曆日期時間: getText('lblDate'),            // 2025年06月06日21時03分47秒.959
+    陰曆日期: getText('lblDateLunar'),           // 陰曆 2025年 5月 11日
+    八字: [],                                     // ['乙巳年','壬午月',...]
+    節氣: getText('lblJiqi'),                     // 芒種
+    元: getText('lblYuen'),                       // 下
+    遁: getText('lblDun'),                        // 陽
+    局: getText('lblKok'),                        // 九
+    值符天干: getText('lblFu'),                   // 沖
+    值使門: getText('lblShi')                     // 傷
+  };
+
+  // 處理八字段落為陣列
+  const baziRaw = document.getElementById('lblBazi')?.innerText || '';
+  if (baziRaw) {
+    result.八字 = baziRaw
+      .replace(/，/g, '')
+      .split(/(?<=..[年月日時分秒毫極元境])/)
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  return result;
+}
+
+
+</script>
+
+
+<script>
+
+function exportReport() {
+	const backgroundData=parseQiMenBackgroundToJson();
+  const data = parseQiMenTableToJson();
+
+
+   // --- 奇門背景資訊區塊 ---
+  let backgroundReport = '';
+  backgroundReport += `你要要用奇門知識以及八字知識以及《煙波釣叟賦》知識以及《遁甲演義》知識以及《黃帝陰符經》知識以及《五行大義》（隋·蕭吉）知識並特別納入空亡位的吉兇影響的知識去綜合分析。\n`;
+
+  backgroundReport += `【奇門背景資訊】\n`;
+  backgroundReport += `公曆：${backgroundData.公曆日期時間}\n`;
+  backgroundReport += `陰曆：${backgroundData.陰曆日期}\n`;
+  backgroundReport += `節氣：${backgroundData.節氣}\n`;
+  backgroundReport += `元遁局：${backgroundData.元}元 ${backgroundData.遁}遁 ${backgroundData.局}局\n`;
+  backgroundReport += `值符：天${backgroundData.值符天干}　值使：${backgroundData.值使門}門\n`;
+  if (backgroundData.八字.length > 0) {
+  	var humanCharacter=[];
+  	for(var i=0;i<4;i++){
+  		humanCharacter[i]=backgroundData.八字[i];
+  	}
+
+    backgroundReport += `八字：${humanCharacter.join('，')}\n`;
+    backgroundReport += `精準八字：${backgroundData.八字.join('，')}\n`;
+  }
+  backgroundReport += `======================\n`;
+
+  let palaceReport = '';
+  let palacesEnergies = ['坎一宮','坤二宮','震三宮','𢁉四宮','五宮/中宮','乾六宮','兌七宮','艮八宮','離九宮'];
+  for (let i = 1; i <= 9; i++) {
+  	const palacesEnergy=palacesEnergies[i-1];
+    const palace = `宮${i}`;
+
+  	//const palace = palacesEnergy[i-1];
+    const info = data[palace];
+    if (!info) continue;
+    let GodsAndDemons = info.神煞.includes("Ｏ") ? info.神煞.replace(/Ｏ/g, "") : info.神煞;
+
+    palaceReport += `【${palacesEnergy}】\n`;
+    palaceReport += `天盤天干：${info.天盤天干 || '無標示'}\n`;
+    palaceReport += `地盤天干：${info.地盤天干 || '無標示'}\n`;
+    palaceReport += `地盤地支：${info.地盤 || '無標示'}\n`;
+    palaceReport += `天星：${info.天星 || '無標示'}\n`;
+    palaceReport += `神煞：${GodsAndDemons || '無標示'}\n`;
+    if(info.神煞.includes("Ｏ")){
+    	palaceReport += `空亡\n`;
+    }
+    palaceReport += `八門：${info.八門 || '無標示'}\n`;
+    palaceReport += `----------------------\n`;
+  }
+
+	const fullReport = `${backgroundReport}${palaceReport}`.trim();
+  // 將報告寫入 textarea
+  document.getElementById('exportReportArea').value = fullReport.trim();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  // 綁定 Export 報告按鈕
+  document.getElementById("btnExportReport").addEventListener("click", exportReport);
+
+  // 綁定 Copy 按鈕
+  document.getElementById("btnCopyReport").addEventListener("click", function () {
+    const textarea = document.getElementById("exportReportArea");
+    textarea.select();
+    document.execCommand("copy");
+    alert("報告內容已複製到剪貼簿！");
+  });
+});
+</script>
+
+</html>

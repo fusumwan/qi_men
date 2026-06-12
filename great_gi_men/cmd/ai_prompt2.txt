@@ -1,0 +1,831 @@
+你是一個熟悉奇門遁甲、三奇六儀、天干地支、九宮、八門、九星、八神、五行生剋，以及 JavaScript OOP 的資深程式專家。
+
+請先了解並使用以下資料檔案：
+
+「奇門遁甲三奇六儀格局.txt」
+
+此檔案包含三奇六儀格局，例如：
+
+辛+己 = 入墓自刑
+解釋：己為甲午辛之火墓。辛落己中，好比自己入墓受刑，故屬凶。
+
+你要根據這份資料，建立一套 JavaScript OOP Rule Engine，用來計算一個奇門宮位的「吉利指數」，分數範圍為 0 至 100。
+
+請建立以下資料夾與檔案：
+
+js/
+
+* QimenPatternRule.js
+* QimenCombinationRule.js
+* QimenElementRule.js
+* QimenPalaceRule.js
+* QimenScoreEngine.js
+
+constants/
+
+* DoorScore.js
+* StarScore.js
+* GodScore.js
+* PalaceData.js
+* ElementData.js
+* PatternData.js
+
+---
+
+# 一、整體計算邏輯
+
+不要只做簡單相加。
+
+宮位吉利指數應該由以下部分組成：
+
+BaseScore
++
+CombinationScore
++
+ElementScore
++
+PatternMultiplier
++
+PalaceModifier
+
+即：
+
+宮位吉利指數 =
+基礎吉凶
++
+組合加權
++
+五行生剋加權
++
+格局放大器
++
+宮位環境修正
+
+最後分數必須限制在 0 至 100。
+
+---
+
+# 二、constants/DoorScore.js
+
+請建立八門基礎分數：
+
+```javascript
+export const DoorScore = {
+  開門: 25,
+  生門: 30,
+  休門: 20,
+  景門: 10,
+  杜門: -10,
+  傷門: -20,
+  驚門: -25,
+  死門: -35
+};
+```
+
+---
+
+# 三、constants/StarScore.js
+
+請建立九星基礎分數：
+
+```javascript
+export const StarScore = {
+  天蓬: -20,
+  天任: 15,
+  天沖: 10,
+  天輔: 20,
+  天英: 5,
+  天芮: -15,
+  天柱: -10,
+  天心: 25,
+  天禽: 20
+};
+```
+
+---
+
+# 四、constants/GodScore.js
+
+請建立八神基礎分數：
+
+```javascript
+export const GodScore = {
+  值符: 30,
+  九天: 20,
+  九地: 15,
+  太陰: 20,
+  六合: 25,
+  騰蛇: -10,
+  白虎: -25,
+  玄武: -20
+};
+```
+
+---
+
+# 五、constants/PalaceData.js
+
+請建立九宮資料：
+
+每一宮要包含：
+
+* name
+* number
+* element
+* direction
+* meaning
+
+資料如下：
+
+坎一宮：
+number: 1
+element: 水
+direction: 北
+meaning: 水、險、流動、智慧、腎、水路
+
+坤二宮：
+number: 2
+element: 土
+direction: 西南
+meaning: 地、母、承載、群眾、房產、穩定
+
+震三宮：
+number: 3
+element: 木
+direction: 東
+meaning: 雷、動、開始、長男、行動、突發
+
+巽四宮：
+number: 4
+element: 木
+direction: 東南
+meaning: 風、流動、滲透、文書、消息、長女
+
+中五宮：
+number: 5
+element: 土
+direction: 中央
+meaning: 中央、樞紐、轉化、核心、過渡
+
+乾六宮：
+number: 6
+element: 金
+direction: 西北
+meaning: 天、父、權力、領導、制度、貴人
+
+兌七宮：
+number: 7
+element: 金
+direction: 西
+meaning: 澤、口舌、少女、交流、喜悅、破損
+
+艮八宮：
+number: 8
+element: 土
+direction: 東北
+meaning: 山、停止、阻隔、少男、積累、轉折
+
+離九宮：
+number: 9
+element: 火
+direction: 南
+meaning: 火、文明、名聲、文書、眼目、曝光
+
+---
+
+# 六、constants/ElementData.js
+
+請建立五行資料。
+
+需要包含：
+
+1. 天干五行
+
+```javascript
+export const GanElement = {
+  甲: "木",
+  乙: "木",
+  丙: "火",
+  丁: "火",
+  戊: "土",
+  己: "土",
+  庚: "金",
+  辛: "金",
+  壬: "水",
+  癸: "水"
+};
+```
+
+2. 八門五行
+
+```javascript
+export const DoorElement = {
+  開門: "金",
+  休門: "水",
+  生門: "土",
+  傷門: "木",
+  杜門: "木",
+  景門: "火",
+  死門: "土",
+  驚門: "金"
+};
+```
+
+3. 九星五行
+
+```javascript
+export const StarElement = {
+  天蓬: "水",
+  天任: "土",
+  天沖: "木",
+  天輔: "木",
+  天英: "火",
+  天芮: "土",
+  天柱: "金",
+  天心: "金",
+  天禽: "土"
+};
+```
+
+4. 五行生剋關係
+
+```javascript
+export const ElementRelation = {
+  generates: {
+    木: "火",
+    火: "土",
+    土: "金",
+    金: "水",
+    水: "木"
+  },
+  controls: {
+    木: "土",
+    土: "水",
+    水: "火",
+    火: "金",
+    金: "木"
+  }
+};
+```
+
+---
+
+# 七、constants/PatternData.js
+
+請根據「奇門遁甲三奇六儀格局.txt」建立三奇六儀格局資料。
+
+要求：
+
+1. 使用 key 格式：
+
+```javascript
+"辛+己"
+```
+
+2. 每個格局格式如下：
+
+```javascript
+{
+  name: "入墓自刑",
+  level: "凶",
+  score: -40,
+  explanation: "己為甲午辛之火墓。辛落己中，好比自己入墓受刑，故屬凶。"
+}
+```
+
+3. 必須支援乙、丙、丁、戊、己、庚、辛、壬、癸之間的 81 種組合。
+
+4. 如果未能一次完成 81 種，也必須先完整建立以下格局：
+
+```javascript
+export const PatternData = {
+  "辛+己": {
+    name: "入墓自刑",
+    level: "凶",
+    score: -40,
+    explanation: "己為甲午辛之火墓。辛落己中，好比自己入墓受刑，故屬凶。"
+  },
+  "壬+戊": {
+    name: "小蛇化龍",
+    level: "吉",
+    score: 30,
+    explanation: "壬為騰蛇，戊為青龍，蛇遇青龍且壬水生甲木，故吉。"
+  },
+  "丙+戊": {
+    name: "飛鳥跌穴",
+    level: "大吉",
+    score: 50,
+    explanation: "丙遇甲，好似飛鳥歸巢，故名飛鳥跌穴，屬大吉。"
+  },
+  "戊+丙": {
+    name: "青龍反首",
+    level: "大吉",
+    score: 40,
+    explanation: "戊為青龍屬木，生丙火，大吉。"
+  },
+  "戊+丁": {
+    name: "青龍耀明",
+    level: "大吉",
+    score: 40,
+    explanation: "戊為青龍屬木，生丁火，丁為星奇，故曰青龍耀明，大吉。"
+  },
+  "乙+丙": {
+    name: "奇儀順遂",
+    level: "吉",
+    score: 30,
+    explanation: "乙為日奇，丙為月奇，日月相逢屬吉格。"
+  },
+  "乙+丁": {
+    name: "奇儀相佐",
+    level: "吉",
+    score: 25,
+    explanation: "乙為日奇，丁為星奇，日星相逢屬吉格。"
+  },
+  "庚+庚": {
+    name: "伏吟 / 戰格",
+    level: "大凶",
+    score: -50,
+    explanation: "庚力倍增，也稱戰格，大凶。"
+  },
+  "戊+庚": {
+    name: "天乙飛宮",
+    level: "大凶",
+    score: -50,
+    explanation: "甲木元帥最怕庚金來克，故為大凶。"
+  },
+  "庚+戊": {
+    name: "天乙伏宮",
+    level: "大凶",
+    score: -50,
+    explanation: "庚金克甲木元帥，大凶。"
+  },
+  "辛+乙": {
+    name: "白虎猖狂",
+    level: "凶",
+    score: -35,
+    explanation: "辛金克乙木，辛為白虎，故曰白虎猖狂，凶。"
+  },
+  "丁+癸": {
+    name: "朱雀投江",
+    level: "凶",
+    score: -40,
+    explanation: "癸主江河，癸水克丁火，故為凶格。"
+  },
+  "癸+辛": {
+    name: "網蓋天獄",
+    level: "大凶",
+    score: -50,
+    explanation: "上有天網，下有天獄，有在劫難逃之意，大凶。"
+  }
+};
+```
+
+---
+
+# 八、js/QimenPatternRule.js
+
+用途：
+處理三奇六儀格局。
+
+要求：
+
+```javascript
+import { PatternData } from "../constants/PatternData.js";
+
+export class QimenPatternRule {
+  normalizeGan(gan) {}
+
+  getPattern(tianGan, diGan) {}
+
+  getPatternByKey(key) {}
+
+  hasPattern(tianGan, diGan) {}
+
+  getAllPatterns() {}
+}
+```
+
+方法說明：
+
+getPattern("辛", "己") 應回傳：
+
+```javascript
+{
+  key: "辛+己",
+  name: "入墓自刑",
+  level: "凶",
+  score: -40,
+  explanation: "己為甲午辛之火墓。辛落己中，好比自己入墓受刑，故屬凶。"
+}
+```
+
+---
+
+# 九、js/QimenPalaceRule.js
+
+用途：
+處理九宮資料。
+
+要求：
+
+```javascript
+import { PalaceData } from "../constants/PalaceData.js";
+
+export class QimenPalaceRule {
+  getPalace(name) {}
+
+  getPalaceElement(name) {}
+
+  getAllPalaces() {}
+}
+```
+
+---
+
+# 十、js/QimenElementRule.js
+
+用途：
+處理五行生剋。
+
+要求：
+
+```javascript
+import {
+  GanElement,
+  DoorElement,
+  StarElement,
+  ElementRelation
+} from "../constants/ElementData.js";
+
+import { PalaceData } from "../constants/PalaceData.js";
+
+export class QimenElementRule {
+  getGanElement(gan) {}
+
+  getDoorElement(door) {}
+
+  getStarElement(star) {}
+
+  getPalaceElement(palaceName) {}
+
+  compare(elementA, elementB) {}
+
+  getRelationScore(elementA, elementB) {}
+
+  analyzePalaceStar(palaceName, star) {}
+
+  analyzePalaceDoor(palaceName, door) {}
+
+  analyzeGanRelation(tianGan, diGan) {}
+}
+```
+
+compare(elementA, elementB) 回傳：
+
+* same
+* generate
+* generatedBy
+* control
+* controlledBy
+* neutral
+
+分數建議：
+
+same: +5
+generate: +10
+generatedBy: +8
+control: -8
+controlledBy: -10
+neutral: 0
+
+例子：
+
+巽四宮 = 木
+天心 = 金
+
+宮木被星金剋，應回傳：
+
+```javascript
+{
+  relation: "controlledBy",
+  score: -10,
+  explanation: "巽四宮屬木，天心屬金，金剋木，宮位環境受星氣壓制。"
+}
+```
+
+---
+
+# 十一、js/QimenCombinationRule.js
+
+用途：
+處理門、星、神、宮、格局之間的組合關係。
+
+要求：
+
+```javascript
+export class QimenCombinationRule {
+  evaluate(input) {}
+
+  evaluateDoorStarPattern(input) {}
+
+  evaluateDoorGodPattern(input) {}
+
+  evaluateDoorPalacePattern(input) {}
+
+  evaluateStarDoorPattern(input) {}
+
+  evaluateStarGodPattern(input) {}
+
+  evaluateStarPalacePattern(input) {}
+
+  evaluatePalaceDoorPattern(input) {}
+
+  evaluatePalaceGodPattern(input) {}
+
+  evaluatePalaceStarPattern(input) {}
+
+  evaluateGodDoorPattern(input) {}
+
+  evaluateGodPalacePattern(input) {}
+
+  evaluateGodStarPattern(input) {}
+}
+```
+
+input 格式：
+
+```javascript
+{
+  palace: "巽四宮",
+  tianGan: "辛",
+  diGan: "己",
+  star: "天心",
+  god: "太陰",
+  door: "杜門",
+  pattern: {
+    name: "入墓自刑",
+    level: "凶",
+    score: -40
+  }
+}
+```
+
+必須先寫完整以下案例：
+
+1. 杜門 + 天心 + 入墓自刑
+   type: "門+星+格局"
+   name: "智慧被困格"
+   score: -10
+   explanation: "天心主智慧判斷，杜門主封閉，遇入墓自刑，代表有能力但暫時不能發揮。"
+
+2. 杜門 + 太陰 + 入墓自刑
+   type: "門+神+格局"
+   name: "暗助受阻格"
+   score: +5
+   explanation: "太陰主暗助，杜門主閉藏，入墓自刑主自困，代表有人暗中幫助，但幫助力量受阻。"
+
+3. 杜門 + 巽四宮 + 入墓自刑
+   type: "門+宮+格局"
+   name: "木宮困金"
+   score: -5
+   explanation: "巽四宮與杜門皆屬木，遇辛金入己墓，形成木宮困金之象。"
+
+4. 天心 + 杜門 + 入墓自刑
+   type: "星+門+格局"
+   name: "閉門思考格"
+   score: +10
+   explanation: "天心主思考判斷，杜門主封閉研究，雖遇入墓自刑，但適合閉門策劃。"
+
+5. 天心 + 太陰 + 入墓自刑
+   type: "星+神+格局"
+   name: "智者隱修格"
+   score: +15
+   explanation: "天心主智慧，太陰主隱藏與暗助，遇入墓自刑，形成外失其勢、內藏其智之象。"
+
+6. 天心 + 巽四宮 + 入墓自刑
+   type: "星+宮+格局"
+   name: "能力受環境壓制"
+   score: -10
+   explanation: "天心屬金，巽宮屬木，木金交戰，加上入墓自刑，代表能力受環境限制。"
+
+7. 巽四宮 + 杜門 + 入墓自刑
+   type: "宮+門+格局"
+   name: "閉塞不通"
+   score: -10
+   explanation: "巽宮與杜門同屬木，杜門主閉塞，入墓自刑主自困，故事情不易通達。"
+
+8. 巽四宮 + 太陰 + 入墓自刑
+   type: "宮+神+格局"
+   name: "女性暗助"
+   score: +10
+   explanation: "太陰主女性、文書、暗助，落巽宮有消息、文書、滲透之象，能暗中補救凶格。"
+
+9. 巽四宮 + 天心 + 入墓自刑
+   type: "宮+星+格局"
+   name: "木金交戰"
+   score: -10
+   explanation: "巽宮屬木，天心屬金，木金相戰，加上入墓自刑，主環境與能力互相牽制。"
+
+10. 太陰 + 杜門 + 入墓自刑
+    type: "神+門+格局"
+    name: "暗中保護"
+    score: +15
+    explanation: "太陰主隱藏保護，杜門主閉藏，雖有入墓自刑，但可避免外部衝擊。"
+
+11. 太陰 + 巽四宮 + 入墓自刑
+    type: "神+宮+格局"
+    name: "女性或文書貴人"
+    score: +10
+    explanation: "太陰主女性與暗助，巽宮主文書消息，代表可由女性、文件、消息渠道得到補救。"
+
+12. 太陰 + 天心 + 入墓自刑
+    type: "神+星+格局"
+    name: "智囊格"
+    score: +20
+    explanation: "太陰主隱密，天心主智慧，雖逢凶格，仍有智囊、暗中策略、內部判斷力。"
+
+evaluate(input) 要回傳所有命中的組合規則陣列。
+
+---
+
+# 十二、js/QimenScoreEngine.js
+
+用途：
+總控制器。
+
+要求：
+
+```javascript
+import { DoorScore } from "../constants/DoorScore.js";
+import { StarScore } from "../constants/StarScore.js";
+import { GodScore } from "../constants/GodScore.js";
+
+import { QimenPatternRule } from "./QimenPatternRule.js";
+import { QimenCombinationRule } from "./QimenCombinationRule.js";
+import { QimenElementRule } from "./QimenElementRule.js";
+import { QimenPalaceRule } from "./QimenPalaceRule.js";
+
+export class QimenScoreEngine {
+  constructor() {}
+
+  evaluate(input) {}
+
+  calculateBaseScore(input, pattern) {}
+
+  calculateCombinationScore(analysis) {}
+
+  calculateElementScore(input) {}
+
+  applyPatternCaps(score, pattern) {}
+
+  getScoreLevel(score) {}
+
+  clamp(score) {}
+
+  buildSummary(input, pattern, finalScore, analysis) {}
+}
+```
+
+輸入：
+
+```javascript
+const palaceData = {
+  palace: "巽四宮",
+  tianGan: "辛",
+  diGan: "己",
+  star: "天心",
+  god: "太陰",
+  door: "杜門"
+};
+```
+
+流程：
+
+1. 用 QimenPatternRule 找出格局
+2. 用 DoorScore、StarScore、GodScore、PatternData 計算 BaseScore
+3. 用 QimenCombinationRule 計算 CombinationScore
+4. 用 QimenElementRule 計算 ElementScore
+5. 加 PalaceModifier
+6. 用 50 + total 轉成 0 至 100 形式
+7. 根據凶格加入上限限制
+8. clamp 0 至 100
+9. 回傳完整分析物件
+
+凶格上限建議：
+
+```javascript
+if (pattern.name === "入墓自刑") {
+  finalScore = Math.min(finalScore, 70);
+}
+
+if (pattern.level === "大凶") {
+  finalScore = Math.min(finalScore, 60);
+}
+
+if (pattern.level === "凶") {
+  finalScore = Math.min(finalScore, 75);
+}
+
+if (pattern.level === "大吉") {
+  finalScore = Math.max(finalScore, 75);
+}
+```
+
+getScoreLevel(score)：
+
+```javascript
+if (score >= 85) return "大吉";
+if (score >= 70) return "中吉";
+if (score >= 55) return "小吉";
+if (score >= 45) return "平";
+if (score >= 30) return "小凶";
+if (score >= 15) return "凶";
+return "大凶";
+```
+
+輸出格式：
+
+```javascript
+{
+  finalScore: 70,
+  level: "中吉",
+  pattern: {
+    key: "辛+己",
+    name: "入墓自刑",
+    level: "凶",
+    score: -40,
+    explanation: "己為甲午辛之火墓。辛落己中，好比自己入墓受刑，故屬凶。"
+  },
+  baseScore: -5,
+  combinationScore: 40,
+  elementScore: -10,
+  palaceModifier: 0,
+  rawScore: 75,
+  cappedScore: 70,
+  analysis: [
+    {
+      type: "門+星+格局",
+      name: "智慧被困格",
+      score: -10,
+      explanation: "天心主智慧判斷，杜門主封閉，遇入墓自刑，代表有能力但暫時不能發揮。"
+    }
+  ],
+  elementAnalysis: [],
+  summary: "此宮屬外凶內吉。入墓自刑為先天凶格，但天心、太陰、杜門形成閉門藏鋒、智者隱修之象。宜謀劃、研究、文書、策略，不宜硬攻、投機或急進。"
+}
+```
+
+---
+
+# 十三、測試例子
+
+最後請建立一段測試程式：
+
+```javascript
+import { QimenScoreEngine } from "./js/QimenScoreEngine.js";
+
+const engine = new QimenScoreEngine();
+
+const result = engine.evaluate({
+  palace: "巽四宮",
+  tianGan: "辛",
+  diGan: "己",
+  star: "天心",
+  god: "太陰",
+  door: "杜門"
+});
+
+console.log(JSON.stringify(result, null, 2));
+```
+
+預期結果：
+
+* pattern.name = "入墓自刑"
+* baseScore = -5
+* combinationScore = 40
+* finalScore 約等於 70
+* level = "中吉"
+* summary 必須指出：
+
+  * 先天凶格
+  * 後天配置有補救
+  * 外凶內吉
+  * 宜謀不宜衝
+  * 宜策劃、研究、文書、策略
+  * 不宜硬攻、投機或急進
+
+---
+
+# 十四、程式要求
+
+* 使用 ES6 module import/export
+* 使用 class
+* 不使用第三方 library
+* 每個檔案職責清晰
+* 每個 class 可獨立測試
+* 所有 score 必須是 number
+* 所有 explanation 必須是繁體中文
+* 程式碼要有適量註解
+* 不要把所有東西寫在一個檔案
+* 必須按照指定資料夾與檔名建立
+* 若 81 個三奇六儀格局未能一次完整寫完，請用 TODO 標記，並確保現有案例可以正常運行
